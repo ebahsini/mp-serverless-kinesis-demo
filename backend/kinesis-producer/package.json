@@ -1,0 +1,16 @@
+{
+  "name": "epx-kinesis-producer",
+  "version": "2.0.0",
+  "private": true,
+  "description": "mock producer for example event stream",
+  "main": "handler.js",
+  "dependencies": {
+    "aws-sdk": "^2.7.6",
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
