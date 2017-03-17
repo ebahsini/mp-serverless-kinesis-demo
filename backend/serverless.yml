@@ -1,0 +1,95 @@
+service: epx-kinesis-cache
+
+#######################
+# NOTE
+# - provisioned resources are in US-EAST OHIO .. us-east-2
+# - feel free to change the region to your hearts desire
+
+custom:
+  local:
+    accountId: 728944228051
+ #   redisHost: 127.0.0.1
+ #   redisPort: 6379
+ #   redisCacheNodeType: cache.t2.micro
+ #   redisSecurityGroup: sg-8f8b59f3
+    region: us-east-2
+    runtime: nodejs4.3
+    scheduleUpdate: rate(1 minute)
+ #   securityGroupRedis: sg-8a67b4f6
+    stage: local
+ #   subnet: subnet-79460c0f
+    streamName: epx-kinesis-cache-stream-local
+    shardCount: 1
+    timeout: 300
+  test:
+    accountId: 728944228051
+    redisHost: epx-safebrowse-test.wu7qqr.0001.use1.cache.amazonaws.com
+    redisPort: 6379
+    region: us-east-2
+    runtime: nodejs4.3
+    scheduleUpdate: rate(1 minute)
+    securityGroupRedis: sg-8a67b4f6
+    stage: test
+    subnet: subnet-79460c0f
+    streamName: epx-kinesis-cache-stream-test
+    shardCount: 1
+    timeout: 300
+
+provider:
+  name: aws
+  runtime: ${self:custom.${opt:stage}.runtime}
+  timeout: ${self:custom.${opt:stage}.timeout} # optional, default is 6
+  region: ${self:custom.${opt:stage}.region}
+  stage: ${self:custom.${opt:stage}.stage}
+  environment:
+    STREAM: ${self:custom.${opt:stage}.streamName}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - logs:CreateLogGroup
+        - logs:CreateLogStream
+        - logs:PutLogEvents
+      Resource: arn:aws:logs:us-east-1:${self:custom.${self:provider.stage}.accountId}:log-group:/aws/lambda/*:*:*
+    - Effect: "Allow"
+      Action:
+        - ec2:CreateNetworkInterface
+        - ec2:AttachNetworkInterface
+        - ec2:DescribeNetworkInterfaces
+        - ec2:DeleteNetworkInterface
+        - ec2:DetachNetworkInterface
+        - ec2:ModifyNetworkInterfaceAttribute
+        - ec2:ResetNetworkInterfaceAttribute
+        - autoscaling:CompleteLifecycleAction
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - kinesis:*
+      Resource:
+        - arn:aws:kinesis:${self:provider.region}:${self:custom.${self:provider.stage}.accountId}:stream/${self:custom.${opt:stage}.streamName}
+
+resources:
+  Resources:
+    visionStream:
+      Type: "AWS::Kinesis::Stream"
+      Properties:
+        Name: ${self:custom.${opt:stage}.streamName}
+        ShardCount: ${self:custom.${opt:stage}.shardCount}
+
+functions:
+  fillStream:
+    name: ${self:service}-fillStream-${self:provider.stage}
+    handler: fillStream.fillStream
+    description: ${self:service} - streams sample URLs onto Kinesis
+ #   vpc:
+ #     securityGroupIds:
+ #       - ${self:custom.${opt:stage}.securityGroupRedis}
+ #     subnetIds:
+ #       - ${self:custom.${opt:stage}.subnet}
+    environment:
+ #     REDIS_HOST: ${self:custom.${opt:stage}.redisHost}
+ #     REDIS_PORT: ${self:custom.${opt:stage}.redisPort}
+      REGION: ${self:custom.${opt:stage}.region}
+      SERVICE: ${self:service}
+      STAGE: ${self:custom.${opt:stage}.stage}
+    events:
+      - schedule: ${self:custom.${opt:stage}.scheduleUpdate}
