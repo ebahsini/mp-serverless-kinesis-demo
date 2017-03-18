@@ -1,0 +1,112 @@
+service: epx-kinesis-consumer
+
+# many configuration values are not required for testing
+# but these are preserved to facilitate creating a new
+# consumer service (with useful configs) -- check
+# values against relevant deployed services
+
+custom:
+  local:
+    accountId: 728944228051
+    redisHost: localhost
+    redisPort: 6379
+    region: us-east-2
+    runtime: nodejs4.3
+    securityGroupRedis: sg-8a67b4f6
+    stage: local
+    stream: arn:aws:kinesis:us-east-1:728944228051:stream/epx-kinesis-cache-stream-local
+    subnet: subnet-79460c0f
+  test:
+    accountId: 728944228051
+ #   redisHost: epx-safebrowse-test.wu7qqr.0001.use1.cache.amazonaws.com
+ #   redisPort: 6379
+    region: us-east-2
+    runtime: nodejs4.3
+ #   securityGroupRedis: sg-8a67b4f6
+    stage: test
+    stream: arn:aws:kinesis:us-east-2:728944228051:stream/epx-kinesis-cache-stream-test
+    subnet: subnet-79460c0f
+  dev:
+    accountId: 112309987251
+    redisHost: v2-safebrowse-dev.h91b4s.0001.use1.cache.amazonaws.com
+    redisPort: 6379
+    region: us-east-1
+    runtime: nodejs4.3
+    securityGroupRedis: sg-31c21d4d
+    stage: dev
+    stream: MISSING_VALUE
+    subnet: subnet-915b0ce6
+  qa:
+    accountId: 112309987251
+    redisHost: v2-safebrowse-qa.h91b4s.0001.use1.cache.amazonaws.com
+    redisPort: 6379
+    region: us-east-1
+    runtime: nodejs4.3
+    securityGroupRedis: sg-31c21d4d
+    stage: qa
+    stream: MISSING_VALUE
+    subnet: subnet-915b0ce6
+  prod:
+    accountId: 112309987251
+    redisHost: v2-safebrowse-prod.h91b4s.0001.use1.cache.amazonaws.com
+    redisPort: 6379
+    region: us-east-1
+    runtime: nodejs4.3
+    securityGroupRedis: sg-31c21d4d
+    stage: prod
+    stream: MISSING_VALUE
+    subnet: subnet-915b0ce6
+
+provider:
+  name: aws
+  runtime: ${self:custom.${opt:stage}.runtime}
+  region: ${self:custom.${opt:stage}.region}
+  stage: ${self:custom.${opt:stage}.stage}
+  environment:
+ #   REDIS_HOST: ${self:custom.${opt:stage}.redisHost}
+ #   REDIS_PORT: ${self:custom.${opt:stage}.redisPort}
+    REGION: ${self:custom.${opt:stage}.region}
+    STAGE: ${self:custom.${opt:stage}.stage}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - logs:CreateLogGroup
+        - logs:CreateLogStream
+        - logs:PutLogEvents
+      Resource: arn:aws:logs:us-east-2:${self:custom.${self:provider.stage}.accountId}:log-group:/aws/lambda/*:*:*
+    - Effect: "Allow"
+      Action:
+        - ec2:CreateNetworkInterface
+        - ec2:AttachNetworkInterface
+        - ec2:DescribeNetworkInterfaces
+        - ec2:DeleteNetworkInterface
+        - ec2:DetachNetworkInterface
+        - ec2:ModifyNetworkInterfaceAttribute
+        - ec2:ResetNetworkInterfaceAttribute
+        - autoscaling:CompleteLifecycleAction
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - kinesis:*
+      Resource: ${self:custom.${opt:stage}.stream}
+
+# items under stream must be indented four spaces
+# or "EventSourceMapping" will not be created (as
+# arn is a property of stream, not a peer)
+functions:
+  consumeKinesis:
+    handler: handler.consumeKinesis
+    name: ${self:service}-${self:provider.stage}
+    description: ${self:service} - mock stream consumer
+    memorySize: 1024
+    timeout: 300
+ #   vpc:
+ #     securityGroupIds:
+ #       - ${self:custom.${opt:stage}.securityGroupRedis}
+ #     subnetIds:
+ #       - ${self:custom.${opt:stage}.subnet}
+    events:
+      - stream:
+          arn: ${self:custom.${opt:stage}.stream}
+          batchSize: 10
+          startingPosition: TRIM_HORIZON

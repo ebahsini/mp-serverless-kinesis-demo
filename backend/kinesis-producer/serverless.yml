@@ -1,4 +1,4 @@
-service: epx-kinesis-cache
+service: epx-kinesis-producer
 
 #######################
 # NOTE
@@ -77,7 +77,7 @@ resources:
 
 functions:
   fillStream:
-    name: ${self:service}-fillStream-${self:provider.stage}
+    name: ${self:service}-${self:provider.stage}
     handler: fillStream.fillStream
     description: ${self:service} - streams sample URLs onto Kinesis
  #   vpc:
