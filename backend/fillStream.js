@@ -22,32 +22,35 @@ AWS.config.update({
 var kinesis = null;
 
 // some sample scaffolding
-var sampleList = require(
+// var sampleList = require("./url-list.json")
+
+const sampleList =
+      { "urls":
+        [
+          "http://www.google.com/",
+          "http://www.youtube.com/",
+          "http://www.facebook.com/",
+          "http://www.baidu.com/",
+          "http://www.wikipedia.org/",
+          "http://www.yahoo.com/",
+          "http://www.google.co.in/"
+        ]
+      }
 
 // main event handler
 module.exports.fillStream = (event, context, callback) => {
-  console.log("yay!");
   // setup kinesis connection
   kinesis = new AWS.Kinesis();
-
-}
-
-function updateStream(ledger, counter) {
-  params = {
-    Data: data,
-    PartitionKey: key,
-    StreamName: ledger.config.STREAM,
-    SequenceNumberForOrdering: (new Date).getTime().toString()
+  var payload = JSON.stringify(sampleList);
+  console.log(" Payload: " + payload);
+  var params = {
+    Data: payload,
+    PartitionKey: "urls", /* required */
+    StreamName: config.STREAM, /* required */
   };
   kinesis.putRecord(params, function(err, data) {
-    if (err) {
-      console.log(err, err.stack);
-      ledger.stats["updateStream"].stream_errors += 1;
-      updateStream(ledger, next);
-      return;
-    }
-    console.log("kinesis.putRecord :: ", data);
-    ledger.stats["updateStream"].sent_records += 1;
-    updateStream(ledger, next);
+    if (err) console.log(err, err.stack); // an error occurred
+    else     console.log(data);           // successful response
   });
+
 }
