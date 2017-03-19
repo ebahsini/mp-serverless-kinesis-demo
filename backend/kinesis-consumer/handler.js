@@ -20,23 +20,23 @@ var redis = null;
 module.exports.consumeKinesis = (event, context, callback) => {
   //console.log(JSON.stringify(event, null, 4));
   // manual hoisting
-  var SBX = {};
-  SBX.config = config;
-  SBX.events = [];
+  var IGS = {};
+  IGS.config = config;
+  IGS.events = [];
 
   // setup redis connection
   // add reconnectOnError option when multi-az
  // redis = new Redis(config.REDIS_PORT, config.REDIS_HOST);
 
   // process stream data
-  parseKinesis(event.Records, SBX);
+  parseKinesis(event.Records, IGS);
 
   // testing artifacts
-  //console.log(SBX.events);
-  //SBX.events = SBX.events.slice(0, 1);
-  console.log("event-zero ::", SBX.events[0]);
-  console.log("event-five ::", SBX.events[4]);
-  console.log("event-count ::", SBX.events.length);
+  //console.log(IGS.events);
+  //IGS.events = IGS.events.slice(0, 1);
+  console.log("event-zero ::", IGS.events[0]);
+  console.log("event-five ::", IGS.events[4]);
+  console.log("event-count ::", IGS.events.length);
 
   // leave happy
   getOut();
