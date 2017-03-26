@@ -1,0 +1,7 @@
+---
+
+- name: install the memcached server
+  sudo: true
+  apt:
+    name=memcached
+    state=present
