@@ -14,7 +14,7 @@ custom:
     runtime: nodejs4.3
     securityGroupRedis: sg-8a67b4f6
     stage: local
-    stream: arn:aws:kinesis:us-east-1:728944228051:stream/epx-kinesis-cache-stream-local
+    stream: arn:aws:kinesis:us-east-1:185354281374:stream/epx-kinesis-cache-stream-local
     subnet: subnet-79460c0f
   test:
     accountId: 185354281374
@@ -27,37 +27,6 @@ custom:
     stream: arn:aws:kinesis:us-east-1:185354281374:stream/epx-kinesis-cache-stream-test
     subnet: subnet-79460c0f
     cacheNodeType: cache.t2.micro
-
-  dev:
-    accountId: MISSING_VALUE
-    redisHost: v2-safebrowse-dev.h91b4s.0001.use1.cache.amazonaws.com
-    redisPort: 6379
-    region: us-east-1
-    runtime: nodejs4.3
-    securityGroupRedis: sg-31c21d4d
-    stage: dev
-    stream: MISSING_VALUE
-    subnet: subnet-915b0ce6
-  qa:
-    accountId: MISSING_VALUE
-    redisHost: v2-safebrowse-qa.h91b4s.0001.use1.cache.amazonaws.com
-    redisPort: 6379
-    region: us-east-1
-    runtime: nodejs4.3
-    securityGroupRedis: sg-31c21d4d
-    stage: qa
-    stream: MISSING_VALUE
-    subnet: subnet-915b0ce6
-  prod:
-    accountId: MISSING_VALUE
-    redisHost: v2-safebrowse-prod.h91b4s.0001.use1.cache.amazonaws.com
-    redisPort: 6379
-    region: us-east-1
-    runtime: nodejs4.3
-    securityGroupRedis: sg-31c21d4d
-    stage: prod
-    stream: MISSING_VALUE
-    subnet: subnet-915b0ce6
 
 provider:
   name: aws
