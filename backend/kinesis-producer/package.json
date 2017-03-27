@@ -1,12 +1,11 @@
 {
-  "name": "epx-kinesis-consumer",
+  "name": "epx-kinesis-producer",
   "version": "2.0.0",
   "private": true,
-  "description": "mock consumer of example event stream",
+  "description": "mock producer for example event stream",
   "main": "handler.js",
   "dependencies": {
     "aws-sdk": "^2.7.6",
-    "ioredis": "^2.5.0"
   },
   "devDependencies": {},
   "scripts": {

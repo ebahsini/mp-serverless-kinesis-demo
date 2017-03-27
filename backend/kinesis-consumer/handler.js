@@ -12,6 +12,7 @@ const AWS = require("aws-sdk");
 AWS.config.update({
   region: config.REGION
 });
+var ses = new AWS.SES();
 var Redis = require('ioredis');
 var redis = null;
 
@@ -57,6 +58,36 @@ function parseKinesis(records, ledger) {
     events = events.concat(payload)
   });
   ledger.events = events;
+}
+
+function sendAlertEmail(alert, ledger) {
+    var params;
+    var message;
+  message = "Your users have encountered something interesting: " + "test url" + "\n" +
+    "This event occured at: " + "test time" + "\n\n" +
+    "User action: " + "test action" + "\n";
+  params = {
+    Destination: {
+      BccAddresses: [ null ],
+      CcAddresses: [ null ],
+      ToAddresses: [ mpalerts.test@mobileposse.com ]
+    },
+    Message: {
+      Body: {
+        Text: {
+          Data: message
+        }
+      },
+      Subject: {
+        Data: "test subject"
+      }
+    },
+    Source: alertsdemo@mobileposse.com
+  };
+  ses.sendEmail(params, function(err, data) {
+    if (err) console.log(err, err.stack);
+    console.log("ses.sendEmail :: ", data);
+  })
 }
 
 function getOut(ledger) {

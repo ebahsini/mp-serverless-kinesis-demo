@@ -7,7 +7,7 @@ service: epx-kinesis-consumer
 
 custom:
   local:
-    accountId: 728944228051
+    accountId: 185354281374
     redisHost: localhost
     redisPort: 6379
     region: us-east-2
@@ -17,19 +17,19 @@ custom:
     stream: arn:aws:kinesis:us-east-1:728944228051:stream/epx-kinesis-cache-stream-local
     subnet: subnet-79460c0f
   test:
-    accountId: 728944228051
+    accountId: 185354281374
  #   redisHost: epx-safebrowse-test.wu7qqr.0001.use1.cache.amazonaws.com
  #   redisPort: 6379
-    region: us-east-2
+    region: us-east-1
     runtime: nodejs4.3
  #   securityGroupRedis: sg-8a67b4f6
     stage: test
-    stream: arn:aws:kinesis:us-east-2:728944228051:stream/epx-kinesis-cache-stream-test
+    stream: arn:aws:kinesis:us-east-1:185354281374:stream/epx-kinesis-cache-stream-test
     subnet: subnet-79460c0f
     cacheNodeType: cache.t2.micro
 
   dev:
-    accountId: 112309987251
+    accountId: MISSING_VALUE
     redisHost: v2-safebrowse-dev.h91b4s.0001.use1.cache.amazonaws.com
     redisPort: 6379
     region: us-east-1
@@ -39,7 +39,7 @@ custom:
     stream: MISSING_VALUE
     subnet: subnet-915b0ce6
   qa:
-    accountId: 112309987251
+    accountId: MISSING_VALUE
     redisHost: v2-safebrowse-qa.h91b4s.0001.use1.cache.amazonaws.com
     redisPort: 6379
     region: us-east-1
@@ -49,7 +49,7 @@ custom:
     stream: MISSING_VALUE
     subnet: subnet-915b0ce6
   prod:
-    accountId: 112309987251
+    accountId: MISSING_VALUE
     redisHost: v2-safebrowse-prod.h91b4s.0001.use1.cache.amazonaws.com
     redisPort: 6379
     region: us-east-1
@@ -186,5 +186,5 @@ functions:
     events:
       - stream:
           arn: ${self:custom.${opt:stage}.stream}
-          batchSize: 10
+          batchSize: 1
           startingPosition: TRIM_HORIZON
