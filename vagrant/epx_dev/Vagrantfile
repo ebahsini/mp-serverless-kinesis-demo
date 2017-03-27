@@ -39,8 +39,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                     '/VirtualBox/GuestAdd/VBoxService/--timesync-set-threshold', 300000]
     end
 
-    epx.vm.synced_folder '../../backend/', '/opt/backend'
-    epx.vm.synced_folder '../../frontend/', '/opt/frontend'
+    epx.vm.synced_folder '../../backend/', '/opt/demo/'
 
     epx.vm.provision 'ansible' do |ansible|
       ansible.inventory_path = 'hosts'
