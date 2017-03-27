@@ -25,17 +25,18 @@ var kinesis = null;
 // var sampleList = require("./url-list.json")
 
 const sampleList =
-      { "urls":
-        [
-          "http://www.google.com/",
-          "http://www.youtube.com/",
-          "http://www.facebook.com/",
-          "http://www.baidu.com/",
-          "http://www.wikipedia.org/",
-          "http://www.yahoo.com/",
-          "http://www.google.co.in/"
-        ]
-      }
+          { "logs":
+            [
+            "1490563327|http://www.google.com/|1",
+            "1490563329|http://www.youtube.com/|2",
+            "1490563357|http://www.facebook.com/|1",
+            "1490563397|http://www.yahoo.com/|4",
+            "1490563527|http://www.twitter.com/|1",
+            "1490563627|http://www.spotify.com/|3",
+            "1490563827|http://www.aol.com/|1",
+            "1490563927|http://www.4chan.com/|2",
+            ]
+          }
 
 // main event handler
 module.exports.fillStream = (event, context, callback) => {

@@ -12,6 +12,7 @@ const AWS = require("aws-sdk");
 AWS.config.update({
   region: config.REGION
 });
+var ses = new AWS.SES();
 var Redis = require('ioredis');
 var redis = null;
 
@@ -59,8 +60,6 @@ function parseKinesis(records, ledger) {
   ledger.events = events;
 }
 
-<<<<<<< Updated upstream
-=======
 function sendAlertEmail(alert, ledger) {
   var message;
   var params;
@@ -92,7 +91,6 @@ function sendAlertEmail(alert, ledger) {
   });
 }
 
->>>>>>> Stashed changes
 function getOut(ledger) {
   // get done
  //  redis.quit();
