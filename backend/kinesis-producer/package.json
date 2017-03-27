@@ -5,7 +5,7 @@
   "description": "mock producer for example event stream",
   "main": "handler.js",
   "dependencies": {
-    "aws-sdk": "^2.7.6",
+    "aws-sdk": "^2.7.6"
   },
   "devDependencies": {},
   "scripts": {
