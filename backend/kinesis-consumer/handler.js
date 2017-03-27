@@ -90,7 +90,6 @@ function sendAlertEmail(alert, ledger) {
   })
 }
 
-
 function getOut(ledger) {
   // get done
  //  redis.quit();
