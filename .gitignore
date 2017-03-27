@@ -1,6 +1,8 @@
-.DS_Store
-node_modules/
-dist/
-npm-debug.log
+# vagrant directories
 .vagrant
+
+# serverless directories
 .serverless
+
+# package directories
+node_modules
