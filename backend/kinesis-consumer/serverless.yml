@@ -155,5 +155,5 @@ functions:
     events:
       - stream:
           arn: ${self:custom.${opt:stage}.stream}
-          batchSize: 1
+          batchSize: 2
           startingPosition: TRIM_HORIZON

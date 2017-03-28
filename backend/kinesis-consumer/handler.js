@@ -26,8 +26,7 @@ module.exports.consumeKinesis = (event, context, callback) => {
   IGS.events = [];
 
   // setup redis connection
-  // add reconnectOnError option when multi-az
- // redis = new Redis(config.REDIS_PORT, config.REDIS_HOST);
+  //redis = new Redis(config.REDIS_PORT, config.REDIS_HOST);
 
   // process stream data
   parseKinesis(event.Records, IGS);
@@ -36,7 +35,6 @@ module.exports.consumeKinesis = (event, context, callback) => {
   //console.log(IGS.events);
   //IGS.events = IGS.events.slice(0, 1);
   console.log("event-zero ::", IGS.events[0]);
-  console.log("event-five ::", IGS.events[4]);
   console.log("event-count ::", IGS.events.length);
 
   // leave happy
@@ -44,18 +42,36 @@ module.exports.consumeKinesis = (event, context, callback) => {
 };
 
 
+// ADD YOUR ERROR HANDLING NOTES!!!
+// serverless invoke local --function consumeKinesis --stage local
+
+
+
 // helpers
 function parseKinesis(records, ledger) {
-  // avoid empty strings (dynamodb-unfriendly)
   // obtain url-events from records
+  var event;
   var events = [];
   records.map((record) => {
-   // parse kinesis data
+    // parse kinesis data
     var buffer = new Buffer(record.kinesis.data, "base64");
     var payload = JSON.parse(buffer.toString("utf8"));
-    // BUILD ARRAY of event objects
-    //console.log (payload);
-    events = events.concat(payload)
+    //console.log(payload);
+    payload.logs.map((log) => {
+      event = {};
+      // denormalize payload data
+      event.device_id = payload.device_id;
+      event.time_publish = payload.time;
+      event.metadata = payload.meta_data;
+      // create event for each log action
+      var items = log.split("|");
+      event.time = items[0];
+      event.url = items[1];
+      event.action = items[2];
+      // update collection
+      console.log(event);
+      events.push(event);
+    });
   });
   ledger.events = events;
 }
@@ -87,11 +103,11 @@ function sendAlertEmail(alert, ledger) {
   };
   ses.sendEmail(params, function(err, data) {
     if (err) console.log(err, err.stack);
-    else     console.log("ses.sendEmail :: ", data);
+    console.log("ses.sendEmail :: ", data);
   });
 }
 
 function getOut(ledger) {
   // get done
- //  redis.quit();
+  // redis.quit();
 }
