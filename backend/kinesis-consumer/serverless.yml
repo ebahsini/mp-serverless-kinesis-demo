@@ -8,25 +8,26 @@ service: demo-consumer
 custom:
   local:
     accountId: 185354281374
+    cacheNodeType: cache.t2.micro
     redisHost: localhost
     redisPort: 6379
     region: us-east-2
     runtime: nodejs4.3
-#    securityGroupRedis: sg-8a67b4f6
+    securityGroupRedis: sg-8a67b4f6   #????
     stage: local
-    stream: arn:aws:kinesis:us-east-1:185354281374:stream/epx-kinesis-cache-stream-local
+    stream: arn:aws:kinesis:us-east-1:185354281374:stream/epx-kinesis-cache-stream-local   #????
     subnet: subnet-79460c0f
   test:
     accountId: 185354281374
- #   redisHost: epx-safebrowse-test.wu7qqr.0001.use1.cache.amazonaws.com
+    cacheNodeType: cache.t2.micro
+    redisHost: demo-consumer-test.z6hach.0001.use1.cache.amazonaws.com
     redisPort: 6379
     region: us-east-1
     runtime: nodejs4.3
-#    securityGroupRedis: sg-8a67b4f6
+    securityGroupRedis: sg-8a67b4f6   #????
     stage: test
     stream: arn:aws:kinesis:us-east-1:185354281374:stream/epx-kinesis-cache-stream-test
     subnet: subnet-79460c0f
-    cacheNodeType: cache.t2.micro
 
 
 provider:
@@ -35,8 +36,8 @@ provider:
   region: ${self:custom.${opt:stage}.region}
   stage: ${self:custom.${opt:stage}.stage}
   environment:
- #   REDIS_HOST: ${self:custom.${opt:stage}.redisHost}
- #   REDIS_PORT: ${self:custom.${opt:stage}.redisPort}
+    REDIS_HOST: ${self:custom.${opt:stage}.redisHost}
+    REDIS_PORT: ${self:custom.${opt:stage}.redisPort}
     REGION: ${self:custom.${opt:stage}.region}
     STAGE: ${self:custom.${opt:stage}.stage}
   iamRoleStatements:
@@ -85,6 +86,17 @@ functions:
           arn: ${self:custom.${opt:stage}.stream}
           batchSize: 2
           startingPosition: TRIM_HORIZON
+  configureKeywords:
+    handler: configure.configureKeywords
+    name: ${self:service}-${self:provider.stage}
+    description: ${self:service} - configure keywords
+    vpc:
+      securityGroupIds:
+        - "Fn::GetAtt": epxExampleElasticacheSecurityGroup.GroupId
+      subnetIds:
+        - Ref: epxExampleSubnetA
+        - Ref: epxExampleSubnetB
+        - Ref: epxExampleSubnetC
 
 
 resources:

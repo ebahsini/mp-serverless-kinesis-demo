@@ -18,22 +18,29 @@ var redis = null;
 // keyword options
 const coldKeywords = ["doge-memes", "mild-stuffs", "robot-matchmaking"];
 const hotKeywords = ["horrible-materials", "bad-stuffs", "4chan.com"];
+const configKey = "demo-keywords";
 var configHot = false;
 
 // main event handler
-module.exports.configure = (event, context, callback) => {
+module.exports.configureKeywords = (event, context, callback) => {
+  var configKeywords;
 
   // setup redis connection
   redis = new Redis(config.REDIS_PORT, config.REDIS_HOST);
 
+  if (configHot) {
+    configKeywords = JSON.stringify(hotKeywords);
+  } else {
+    configKeywords = JSON.stringify(coldKeywords);
+  }
 
-// CONFIG GOES HERE!!!
-
-
-
-
-
-
-  // please rewind
-  redis.quit()
+  redis.set(configKey, configKeywords, function(err, data) {
+    if (err) return console.log("Config Update Failed :: ", err);
+    // log update of config
+    redis.get(configKey, function(err, data) {
+      console.log("Config Updated :: ", data);
+        // please rewind
+        redis.quit();
+    });
+  });
 };
