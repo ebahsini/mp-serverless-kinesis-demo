@@ -1,5 +1,5 @@
 {
-  "name": "epx-kinesis-producer",
+  "name": "demo-producer",
   "version": "2.0.0",
   "private": true,
   "description": "mock producer for example event stream",

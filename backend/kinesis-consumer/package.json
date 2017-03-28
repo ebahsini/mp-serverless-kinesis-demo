@@ -1,5 +1,5 @@
 {
-  "name": "epx-kinesis-consumer",
+  "name": "demo-consumer",
   "version": "2.0.0",
   "private": true,
   "description": "mock consumer of example event stream",

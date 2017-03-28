@@ -1,4 +1,4 @@
-service: epx-kinesis-producer
+service: demo-producer
 
 #######################
 # NOTE

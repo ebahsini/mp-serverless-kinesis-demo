@@ -1,4 +1,4 @@
-service: epx-kinesis-consumer
+service: demo-consumer
 
 # many configuration values are not required for testing
 # but these are preserved to facilitate creating a new
@@ -27,6 +27,7 @@ custom:
     stream: arn:aws:kinesis:us-east-1:185354281374:stream/epx-kinesis-cache-stream-test
     subnet: subnet-79460c0f
     cacheNodeType: cache.t2.micro
+
 
 provider:
   name: aws
@@ -61,8 +62,30 @@ provider:
         - kinesis:*
       Resource: ${self:custom.${opt:stage}.stream}
 
-################
-#### RESOURCES
+
+# items under stream must be indented four spaces
+# or "EventSourceMapping" will not be created (as
+# arn is a property of stream, not a peer)
+functions:
+  consumeKinesis:
+    handler: consume.consumeKinesis
+    name: ${self:service}-${self:provider.stage}
+    description: ${self:service} - mock stream consumer
+    memorySize: 1024
+    timeout: 300
+    vpc:
+      securityGroupIds:
+        - "Fn::GetAtt": epxExampleElasticacheSecurityGroup.GroupId
+      subnetIds:
+        - Ref: epxExampleSubnetA
+        - Ref: epxExampleSubnetB
+        - Ref: epxExampleSubnetC
+    events:
+      - stream:
+          arn: ${self:custom.${opt:stage}.stream}
+          batchSize: 2
+          startingPosition: TRIM_HORIZON
+
 
 resources:
   Resources:
@@ -126,6 +149,7 @@ resources:
       DependsOn: epxExampleElasticacheSecurityGroup
       Type: AWS::ElastiCache::CacheCluster
       Properties:
+        ClusterName: ${self:service}-${opt:stage}
         CacheNodeType: ${self:custom.${opt:stage}.cacheNodeType}
         Engine: "redis"
         NumCacheNodes: 1
@@ -133,27 +157,3 @@ resources:
         - "Fn::GetAtt": epxExampleElasticacheSecurityGroup.GroupId
         CacheSubnetGroupName:
           Ref: epxExampleElasticacheSubnetGroup
-
-################
-################
-
-# items under stream must be indented four spaces
-# or "EventSourceMapping" will not be created (as
-# arn is a property of stream, not a peer)
-functions:
-  consumeKinesis:
-    handler: handler.consumeKinesis
-    name: ${self:service}-${self:provider.stage}
-    description: ${self:service} - mock stream consumer
-    memorySize: 1024
-    timeout: 300
-#    vpc:
-#      securityGroupIds:
-#        - ${self:custom.${opt:stage}.securityGroupRedis}
-#      subnetIds:
-#        - ${self:custom.${opt:stage}.subnet}
-    events:
-      - stream:
-          arn: ${self:custom.${opt:stage}.stream}
-          batchSize: 2
-          startingPosition: TRIM_HORIZON
