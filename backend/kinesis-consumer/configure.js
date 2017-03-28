@@ -15,6 +15,10 @@ AWS.config.update({
 var Redis = require('ioredis');
 var redis = null;
 
+// keyword options
+const coldKeywords = ["doge-memes", "mild-stuffs", "robot-matchmaking"];
+const hotKeywords = ["horrible-materials", "bad-stuffs", "4chan.com"];
+var configHot = false;
 
 // main event handler
 module.exports.configure = (event, context, callback) => {
@@ -24,6 +28,10 @@ module.exports.configure = (event, context, callback) => {
 
 
 // CONFIG GOES HERE!!!
+
+
+
+
 
 
   // please rewind
