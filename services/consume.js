@@ -1,7 +1,19 @@
 "use strict";
 
+
+
+// ADD YOUR ERROR HANDLING NOTES!!!
+// serverless invoke local --function consumeKinesis --stage local
+
+
+
+
+
+
 // handler configuration
 const config = {};
+config.EMAIL_ALERT = process.env.EMAIL_ALERT;
+config.EMAIL_SOURCE = process.env.EMAIL_SOURCE;
 config.REDIS_HOST = process.env.REDIS_HOST;
 config.REDIS_PORT = process.env.REDIS_PORT;
 config.REGION = process.env.REGION;
@@ -18,33 +30,29 @@ var redis = null;
 
 
 // main event handler
-module.exports.consumeKinesis = (event, context, callback) => {
+module.exports.consumeStream = (event, context, callback) => {
   //console.log(JSON.stringify(event, null, 4));
-  // manual hoisting
-  var IGS = {};
-  IGS.config = config;
-  IGS.events = [];
+  // demo state - pass via parameter, not actual global
+  var DS = {};
+  DS.callback = callback;
+  DS.config = config;
+  DS.events = [];
 
   // setup redis connection
-  //redis = new Redis(config.REDIS_PORT, config.REDIS_HOST);
+  redis = new Redis(config.REDIS_PORT, config.REDIS_HOST);
 
   // process stream data
-  parseKinesis(event.Records, IGS);
+  parseKinesis(event.Records, DS);
 
   // testing artifacts
-  //console.log(IGS.events);
-  //IGS.events = IGS.events.slice(0, 1);
-  console.log("event-zero ::", IGS.events[0]);
-  console.log("event-count ::", IGS.events.length);
+  //console.log(DS.events);
+  //IGS.events = DS.events.slice(0, 1);
+  console.log("event-zero ::", DS.events[0]);
+  console.log("event-count ::", DS.events.length);
 
   // leave happy
   getOut();
 };
-
-
-// ADD YOUR ERROR HANDLING NOTES!!!
-// serverless invoke local --function consumeKinesis --stage local
-
 
 
 // helpers
@@ -109,5 +117,5 @@ function sendAlertEmail(alert, ledger) {
 
 function getOut(ledger) {
   // get done
-  // redis.quit();
+ redis.quit();
 }

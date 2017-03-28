@@ -2,15 +2,7 @@
 
 // handler configuration
 const config = {};
-config.API_KEY = process.env.API_KEY;
-config.EMAIL_API_TO = process.env.EMAIL_API_TO;
-config.EMAIL_SOURCE = process.env.EMAIL_SOURCE;
-config.EMAIL_URL_TO = process.env.EMAIL_URL_TO;
-config.REDIS_HOST = process.env.REDIS_HOST;
-config.REDIS_PORT = process.env.REDIS_PORT;
 config.REGION = process.env.REGION;
-config.SNS_API_TOPIC = process.env.SNS_API_THROTTLE_TOPIC;
-config.SNS_URL_TOPIC = process.env.SNS_ALERT_TOPIC;
 config.STAGE = process.env.STAGE;
 config.STREAM = process.env.STREAM;
 
@@ -35,7 +27,7 @@ const injectMatch = false;
 
 
 
-const spb_01 = {
+const robot_01 = {
   "device_id": "r2d2",
   "time": "put-time-here",
   "meta_data": "mork",
@@ -51,7 +43,7 @@ const spb_01 = {
   ]
 }
 
-const spb_02 = {
+const robot_02 = {
   "device_id": "c3p0",
   "time": "put-time-here",
   "meta_data": "mindy",
@@ -67,7 +59,7 @@ const spb_02 = {
   ]
 }
 
-const spb_03 = {
+const robot_03 = {
   "device_id": "astro-boy",
   "time": "put-time-here",
   "meta_data": "bubble-tea",
@@ -83,7 +75,7 @@ const spb_03 = {
   ]
 }
 
-const spb_04 = {
+const robot_04 = {
   "device_id": "bender",
   "time": "put-time-here",
   "meta_data": "cold-brew",
@@ -106,14 +98,14 @@ const spb_04 = {
 
 
 // main event handler
-module.exports.fillStream = (event, context, callback) => {
+module.exports.publishStream = (event, context, callback) => {
   var payload;
 
   // setup kinesis connection
   kinesis = new AWS.Kinesis();
 
   // push payload-01
-  payload = spb_01;
+  payload = robot_01;
   var params = {
     Data: JSON.stringify(payload),
     PartitionKey: payload.device_id,
@@ -125,7 +117,7 @@ module.exports.fillStream = (event, context, callback) => {
   });
 
   // push payload-02
-  payload = spb_02;
+  payload = robot_02;
   var params = {
     Data: JSON.stringify(payload),
     PartitionKey: payload.device_id,
@@ -137,7 +129,7 @@ module.exports.fillStream = (event, context, callback) => {
   });
 
   // push payload-03
-  payload = spb_03;
+  payload = robot_03;
   var params = {
     Data: JSON.stringify(payload),
     PartitionKey: payload.device_id,
@@ -151,7 +143,7 @@ module.exports.fillStream = (event, context, callback) => {
   if (injectMatch) {
     console.log("Test Mode :: Inject Matching Data");
     // push payload-04
-    payload = spb_04;
+    payload = robot_04;
     var params = {
       Data: JSON.stringify(payload),
       PartitionKey: payload.device_id,
