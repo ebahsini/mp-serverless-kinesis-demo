@@ -11,9 +11,9 @@ Test data is provided for local testing of the configure, consume and report han
 
 Configuration as code is marvelous. But it can also lead one to a dark place.
 
-For all this to work, you should have (or create) a private subnet and security group for redis, and a simple, single shard Kinesis stream in the same region. SES validated emails help, too.
+For all this to work, you should have (or create) subnets (private and public) and security group for redis, and a simple, single shard Kinesis stream in the same region.
 
-You could skip the SES, any notification service could work. Alerting is not crucial to the demo.
+You could skip the SES, any notification service could work. A good explaination of the nextwork setup (public subnet with igw routing and associated nat, and corresponding private subnet with local and nat routing) is found on stackoverflow ["AWS: Sending email through SES from Lambda"](http://stackoverflow.com/questions/38379117/aws-sending-email-through-ses-from-lambda).
 
 The essence of the exercise is to show how simple and pragmatic it can be to glean analytics from a stream. The example data is purposefully kept trivial, but it would help greatly to understand this is for processing 100s of millions of log entries per day.
 
@@ -22,6 +22,8 @@ If the data were crucial for generating revenue, you would be storing it in Reds
 For much less cost, one can perform various real-time analytics for various purposes, and store results in cache. We should how alerting could be used when appropriate.
 
 Stream processing does not have to be expensive and complicated...
+
+We are experimenting with options for infrastructure provisioning to simplify the demo.
 
 ## Deploying Services
 

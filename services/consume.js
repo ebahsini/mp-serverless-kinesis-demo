@@ -260,8 +260,9 @@ function checkKeywords(ledger, counter) {
     }
     // send alert
     if (event.status == matchState) {
-      // async fun, if you serialize alert, SES timeout
-      // will shut down your pipeline
+      // for demo, we could make logs easy to grok by waiting for
+      // email to be sent before continuing, but... this would be
+      // the wrong choice for most use-cases
       console.log("Suspicious Activity - Sending Alert!");
       sendAlert(event, ledger);
     }

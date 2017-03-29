@@ -114,3 +114,12 @@ functions:
         - ${self:custom.${opt:stage}.securityGroupRedis}
       subnetIds:
         - ${self:custom.${opt:stage}.subnet}
+  reset:
+    handler: reset.resetCache
+    name: demo-reset-${opt:stage}
+    description: ${self:service} - flush cache
+    vpc:
+      securityGroupIds:
+        - ${self:custom.${opt:stage}.securityGroupRedis}
+      subnetIds:
+        - ${self:custom.${opt:stage}.subnet}
