@@ -3,8 +3,6 @@ epx_dev
 
 This directory allows you to bring up a development environment for testing node solutions which create AWS infrastructure and/or interact with cloud resources. If you have issues, please read [_when your environment breaks_](../README.md).
 
-("mon" is short for monitor, e.g. content monitoring/curating tools.)
-
 Requirements
 ------------
 

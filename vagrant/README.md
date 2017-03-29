@@ -3,7 +3,7 @@ Vagrant
 
 **You are not required to use this environment. But you must be wary that the AWS Lambda nodejs v4.3.2 runtime does not offer full [ECMAScript 6](https://kangax.github.io/compat-table/es6/).**
 
-DevOps strongly encourages us to test and develop in production-like environments. There are always trade-offs though. Developing and testing using AWS resources is simple enough, but a local linux environment can be useful. 
+DevOps strongly encourages us to test and develop in production-like environments. There are always trade-offs though. Developing and testing using AWS resources is simple enough, but a local linux environment may be convenient. 
 
 *If you must build a binary, that must be done on an AWS instance for the purpose. There is no local environment available you should trust to match the release used by AWS.*
 
