@@ -1,6 +1,6 @@
 # serverless-kinesis-cache-example
 
-![serverless kinesis cache example diagram](/docs/cloudcraft-serverless-kinesis-cache-example.png?raw=true "Kinesis + Redis, FTW")
+![serverless kinesis cache example diagram](/docs/cloudcraft-diagram.png?raw=true "Kinesis + Redis, FTW")
 
 
 ## Special thanks to [@mobileposse](https://github.com/mobileposse), [John Lemp](https://github.com/duckworth), [Sean Broderick](https://github.com/hakutsuru), and [EPX Labs](https://github.com/epxlabs) for contributions to this effort.
