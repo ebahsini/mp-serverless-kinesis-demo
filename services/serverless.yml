@@ -105,3 +105,12 @@ functions:
         - ${self:custom.${opt:stage}.securityGroupRedis}
       subnetIds:
         - ${self:custom.${opt:stage}.subnet}
+  report:
+    handler: report.reportMetrics
+    name: demo-report-${opt:stage}
+    description: ${self:service} - report metrics
+    vpc:
+      securityGroupIds:
+        - ${self:custom.${opt:stage}.securityGroupRedis}
+      subnetIds:
+        - ${self:custom.${opt:stage}.subnet}

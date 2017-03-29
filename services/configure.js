@@ -56,6 +56,7 @@ module.exports.configureKeywords = (event, context, callback) => {
       console.log("Config Updated :: ", data);
         // please rewind
         redis.quit();
+        callback();
     });
   });
 };
