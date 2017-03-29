@@ -8,12 +8,12 @@ service: demo
 custom:
   local:
     accountId: 185354281374
-    emailAlert: mpalerts.test@mobileposse.com
-    emailSource: mpalerts.test@mobileposse.com
+    emailAlert: evan@epxlabs.com
+    emailSource: alertsdemo@mobileposse.com
     logGroup: arn:aws:logs:us-east-1:local:log-group:/aws/lambda/*:*:*
     redisHost: localhost
     redisPort: 6379
-    region: us-east-2
+    region: us-east-1
     runtime: nodejs4.3
     securityGroupRedis: sg-72be370d
     stage: local
@@ -22,8 +22,8 @@ custom:
     subnet: subnet-c79d94ea
   test:
     accountId: 185354281374
-    emailAlert: mpalerts.test@mobileposse.com
-    emailSource: mpalerts.test@mobileposse.com
+    emailAlert: evan@epxlabs.com
+    emailSource: alertsdemo@mobileposse.com
     logGroup: arn:aws:logs:us-east-1:test:log-group:/aws/lambda/*:*:*
     redisHost: demo-test.z6hach.0001.use1.cache.amazonaws.com
     redisPort: 6379

@@ -25,8 +25,12 @@ AWS.config.update({
   region: config.REGION
 });
 var ses = new AWS.SES();
-var Redis = require('ioredis');
+var Redis = require("ioredis");
 var redis = null;
+
+// event states
+const defaultState = "nope";
+const matchState = "match";
 
 // cache - general
 const cacheEX = 14 * 24 * 60 * 60;
@@ -137,7 +141,8 @@ function parseStream(records, ledger) {
     payload.logs.map((log) => {
       event = {};
       // denormalize payload data
-      event.device_id = payload.device_id;
+      event.status = defaultState;
+      event.device = payload.device_id;
       event.time_publish = payload.time;
       event.metadata = payload.meta_data;
       // create event for each log action
@@ -145,8 +150,9 @@ function parseStream(records, ledger) {
       event.time = items[0];
       event.url = items[1];
       event.action = items[2];
-      // update collection
       //console.log(event);
+      event.matches = [];
+      // update collection
       events.push(event);
     });
   });
@@ -167,7 +173,7 @@ function parseStream(records, ledger) {
 
 function getKeywords(ledger) {
   // obtain keywords from cache
-  console.log("getKeywords");
+  //console.log("getKeywords");
   ledger.stats["getKeywords"] = {};
   ledger.stats["getKeywords"].duration = new Date();
   ledger.stats["getKeywords"].list_available = false;
@@ -212,25 +218,94 @@ function getKeywords(ledger) {
   });
 }
 
-function checkKeywords(ledger) {
-  console.log("checkKeywords");
-
-  updateStats(ledger)
+function checkKeywords(ledger, counter) {
+  // scan keywords for matches
+  var next = counter + 1;
+  var event = ledger.events[counter];
+  var keywordsReportKey = ledger.setup.keywordsReportKey;
+  if (counter == 0) {
+    ledger.stats["checkKeywords"] = {};
+    ledger.stats["checkKeywords"].duration = new Date();
+    ledger.stats["checkKeywords"].event_matches = 0;
+    ledger.stats["checkKeywords"].list_matches = 0;
+    ledger.stats["checkKeywords"].cache_errors = 0;
+  }
+  //console.log("checkKeywords :: " + counter);
+  // punt when lacking keywords
+  if (!ledger.keywords) {
+    var duration = new Date() - ledger.stats["checkKeywords"].duration;
+    ledger.stats["checkKeywords"].duration = duration/1000;
+    updateStats(ledger);
+    return;
+  }
+  // check event against keywords
+  if (event) {
+    // loop against keywords
+    // minor risk here, without serializing access to cache
+    // many calls could exhaust connections, but hincrby
+    // is fast so risk should be minimal
+    var url = event.url;
+    var eventMatch = false;
+    var listCount = ledger.keywords.length;
+    for (var index = 0; index < listCount; index += 1) {
+      var filter = ledger.keywords[index];
+      if (url.includes(filter)) {
+        event.matches.push(filter);
+        if (event.status != matchState) {
+          ledger.stats["checkKeywords"].event_matches += 1;
+          event.status = matchState;
+        }
+        // do not assume only single match
+        ledger.stats["checkKeywords"].list_matches += 1;
+        redis.hincrby(keywordsReportKey, filter, 1, function(err) {
+          if (err) {
+            ledger.stats["checkKeywords"].cache_errors += 1;
+            console.log(err);
+          }
+        });
+        // we need to count devices which match
+        // nested structures are not supported via
+        // redis, but we can post-process for report
+        // danger - delimiter must be forbidden in urls
+        var deviceToken = filter + keywordsDelimiter + event.device;
+        redis.hincrby(keywordsReportKey, deviceToken, 1, function(err) {
+          if (err) {
+            ledger.stats["checkKeywords"].cache_errors += 1;
+            console.log(err);
+          }
+        });
+      }
+    }
+    // send alert
+    if (event.status == matchState) {
+      sendAlert(event, ledger);
+    }
+    // check next event
+    checkKeywords(ledger, next);
+  } else {
+    var duration = new Date() - ledger.stats["checkKeywords"].duration;
+    ledger.stats["checkKeywords"].duration = duration/1000;
+    updateStats(ledger);
+  }
 }
 
-function sendAlert(alert, ledger) {
+function sendAlert(event, ledger) {
   console.log("sendAlert");
   var message;
   var params;
   message =
-    "Your users have encountered something interesting: " + "test url" + "\n\n" +
-    "This event occured at: " + "test time" + "\n\n" +
-    "User action: " + "test action" + "\n";
+    "Danger, Robots are researching *singularity*!\n\n" +
+    `Robot: ${event.device}\n` +
+    `When: ${event.time}\n` +
+    `Offences: ${event.matches.join(", ")}\n\n` +
+    `Action: ${event.action}\n` +
+    `Meta: ${event.metadata}\n\n` +
+    "Ready the drone nets!"
   params = {
     Destination: {
       BccAddresses: [ null ],
       CcAddresses: [ null ],
-      ToAddresses: [ 'evan@epxlabs.com' ]
+      ToAddresses: [ ledger.config.EMAIL_ALERT ]
     },
     Message: {
       Body: {
@@ -239,11 +314,13 @@ function sendAlert(alert, ledger) {
         }
       },
       Subject: {
-        Data: 'ALERT: Example Data Found!!1!1one',
+        Data: "ALERT: Bad Robot!",
       }
     },
-    Source: 'alertsdemo@mobileposse.com',
+    Source: ledger.config.EMAIL_SOURCE,
   };
+  //console.log(params);
+  //console.log(message);
   ses.sendEmail(params, function(err, data) {
     if (err) console.log(err, err.stack);
     console.log("ses.sendEmail ::", data);
