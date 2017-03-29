@@ -28,6 +28,26 @@ var ses = new AWS.SES();
 var Redis = require('ioredis');
 var redis = null;
 
+// cache - general
+const cacheEX = 14 * 24 * 60 * 60;
+
+// cache - keywords
+const keywordsReportKeySuffix = ":keywords";
+const keywordsKey = "demo-keywords";
+const keywordsSkipped = "<skipped>";
+const keywordsDelimiter = "|";
+
+// cache - metrics
+const statsKeySuffix = ":stats";
+const statsKeyTotal = "total_count";
+const statsKeyMatch = "match_count";
+
+// redis caveats
+// 1] keep key names short (when many keys with pattern) to avoid wasting
+// memory (e.g. device based key suffixing)
+// 2] consider two week window for general keys - in general, avoid storing
+// keys without expiration (keywords config would be an exception)
+
 
 // main event handler
 module.exports.consumeStream = (event, context, callback) => {
@@ -39,14 +59,43 @@ module.exports.consumeStream = (event, context, callback) => {
   // production deployment)
   //console.log(JSON.stringify(event, null, 2));
 
+  // date processing - use UTC for simplicity
+  var setup = {};
+  var processingDateUTC = new Date();
+  var isoTimeUTC = processingDateUTC.toISOString();
+  var isoDateUTC = processingDateUTC.toISOString().slice(0,10);
+  setup.isoTimeUTC = isoTimeUTC;
+  setup.keywordsReportKey = isoDateUTC + keywordsReportKeySuffix;
+  setup.statsReportKey = isoDateUTC + statsKeySuffix;
+
+  // cache will include daily stats and keywords-report data
+  // in different keys -- this could be more flexible, but they
+  // could also be combined
+
   // demo state - pass via parameter, not actual global
   var DS = {};
   DS.callback = callback;
   DS.config = config;
+  DS.context = context;
   DS.events = [];
+  DS.keywords = null;
+  DS.setup = setup;
+  DS.stats = {}
 
   // setup redis connection
   redis = new Redis(config.REDIS_PORT, config.REDIS_HOST);
+
+  // setup aggregate stats
+  redis.
+    multi().
+    hsetnx(setup.statsReportKey, statsKeyTotal, 0).
+    hsetnx(setup.statsReportKey, statsKeyMatch, 0).
+    expire(setup.statsReportKey, cacheEX).
+    exec(function(err, data) {
+      if (err) {
+        console.log(err);
+      }
+    });
 
   // process stream data
   parseStream(event.Records, DS);
@@ -54,15 +103,14 @@ module.exports.consumeStream = (event, context, callback) => {
   // testing artifacts
   //console.log(DS.events);
   //DS.events = DS.events.slice(0, 1);
-  console.log("event-zero ::", DS.events[0]);
-  console.log("event-count ::", DS.events.length);
+  //console.log("event-zero ::", DS.events[0]);
+  //console.log("event-count ::", DS.events.length);
 
   // callback flow - async tasks serialized manually
   // getKeywords
   // -> checkKeywords
   // -> updateStats
   // -> logStats
-  // -> getOut
   getKeywords(DS);
 };
 
@@ -70,6 +118,15 @@ module.exports.consumeStream = (event, context, callback) => {
 // helpers
 function parseStream(records, ledger) {
   // obtain url-events from records
+  //console.log("parseStream");
+  ledger.stats["parseStream"] = {};
+  ledger.stats["parseStream"].duration = new Date();
+
+//stuff goes here
+
+
+
+  // assemble data from records
   var event;
   var events = [];
   records.map((record) => {
@@ -94,13 +151,65 @@ function parseStream(records, ledger) {
     });
   });
   ledger.events = events;
+  // update daily stats
+
+
+
+
+
+  // update handler stats
+  ledger.stats["parseStream"].event_count = events.length;
+  var duration = new Date() - ledger.stats["parseStream"].duration;
+  ledger.stats["parseStream"].duration = duration/1000;
 }
 
+//function getKeywords(ledger) {
+
 function getKeywords(ledger) {
+  // obtain keywords from cache
   console.log("getKeywords");
-
-
-  checkKeywords(ledger);
+  ledger.stats["getKeywords"] = {};
+  ledger.stats["getKeywords"].duration = new Date();
+  ledger.stats["getKeywords"].list_available = false;
+  ledger.stats["getKeywords"].list_size = 0;
+  var keywordsReportKey = ledger.setup.keywordsReportKey;
+  // setup reporting data
+  // the primary purpose here is setting
+  // time-to-live, and there should be no
+  // issue with this finishing out-of-order
+  redis.
+    multi().
+    hsetnx(keywordsReportKey, keywordsSkipped, 0).
+    expire(keywordsReportKey, cacheEX).
+    exec(function(err, data) {
+      if (err) {
+        console.log(err);
+      }
+    });
+  // query cache for keywords
+  // we want atomic list updates, using
+  // json should be the simplest option
+  redis.get(keywordsKey, function(err, data) {
+    if (err) {
+      console.log(err);
+    }
+    if (data) {
+      ledger.keywords = JSON.parse(data);
+      ledger.stats["getKeywords"].list_available = true;
+      ledger.stats["getKeywords"].list_size = ledger.keywords.length;
+    } else {
+      // update report on failure
+      if (!ledger.stats["getKeywords"].list_available) {
+        var skipped = ledger.events.length;
+        redis.hincrby(keywordsReportKey, keywordsSkipped, skipped, function(err) {
+          if (err) { console.log(err) }
+        });
+      }
+    }
+    var duration = new Date() - ledger.stats["getKeywords"].duration;
+    ledger.stats["getKeywords"].duration = duration/1000;
+    checkKeywords(ledger, 0);
+  });
 }
 
 function checkKeywords(ledger) {
@@ -137,7 +246,7 @@ function sendAlert(alert, ledger) {
   };
   ses.sendEmail(params, function(err, data) {
     if (err) console.log(err, err.stack);
-    console.log("ses.sendEmail :: ", data);
+    console.log("ses.sendEmail ::", data);
   });
 }
 
@@ -149,12 +258,16 @@ function updateStats(ledger) {
 
 
 function logStats(ledger) {
-  console.log("logStats");
-
-  getOut(ledger);
-}
-
-function getOut(ledger) {
-  // get done
- redis.quit();
+  // dump metrics to cloudwatch
+  //console.log("logStats");
+  ledger.stats["logStats"] = {};
+  ledger.stats["logStats"].done = true;
+  // note how ledger may not contain updated stats
+  // if async callbacks are not finished, so were
+  // we careful to only call this when ready?
+  console.log(JSON.stringify(ledger.stats, null, 4));
+  // exit gracefully
+  redis.quit();
+  ledger.context.done();
+  ledger.callback();
 }
