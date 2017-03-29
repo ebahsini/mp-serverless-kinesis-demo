@@ -272,7 +272,10 @@ function checkKeywords(ledger, counter) {
 }
 
 function sendAlert(event, ledger) {
-  console.log("sendAlert");
+  //console.log("sendAlert");
+  // send alert
+  // how could you rate-limit alerts?
+  // redis counters make this easy
   var message;
   var params;
   message =
@@ -310,11 +313,33 @@ function sendAlert(event, ledger) {
 }
 
 function updateStats(ledger) {
-  console.log("updateStats");
-
-  logStats(ledger);
+  // update *aggregate* stats in cache, handler stats
+  // are logged, but for reporting, it will probably
+  // make sense to store counters in cache
+  //console.log("updateStats");
+  ledger.stats["updateStats"] = {};
+  ledger.stats["updateStats"].duration = new Date();
+  ledger.stats["updateStats"].cache_errors = 0;
+  var statsReportKey = ledger.setup.statsReportKey;
+  var updateValue = ledger.stats.parseStream.event_count;
+  redis.hincrby(statsReportKey, statsKeyTotal, updateValue, function(err) {
+    if (err) {
+      console.log(err);
+      ledger.stats["updateStats"].cache_errors += 1;
+    }
+    updateValue = ledger.stats.checkKeywords.event_matches;
+    redis.hincrby(statsReportKey, statsKeyMatch, updateValue, function(err) {
+      if (err) {
+        console.log(err);
+        ledger.stats["updateStats"].cache_errors += 1;
+      }
+      // yes, "callback hell", but embrace its simplicity
+      var duration = new Date() - ledger.stats["updateStats"].duration;
+      ledger.stats["updateStats"].duration = duration/1000;
+      logStats(ledger);
+    });
+  });
 }
-
 
 function logStats(ledger) {
   // dump metrics to cloudwatch
