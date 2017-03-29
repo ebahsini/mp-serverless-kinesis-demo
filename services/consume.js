@@ -31,7 +31,14 @@ var redis = null;
 
 // main event handler
 module.exports.consumeStream = (event, context, callback) => {
-  //console.log(JSON.stringify(event, null, 4));
+  // important hack -- here is how you get data for local testing, e.g.
+  // serverless invoke local --function consume --path data/event-with-bender.json --stage local
+  // copy data from cloudwatch, and store in "data/event-with-bender.json" or
+  // similar file, then the development-testing cycle will be much faster than
+  // deploying minor changes (of course, check updates in test before doing
+  // production deployment)
+  //console.log(JSON.stringify(event, null, 2));
+
   // demo state - pass via parameter, not actual global
   var DS = {};
   DS.callback = callback;

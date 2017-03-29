@@ -18,6 +18,7 @@ custom:
     securityGroupRedis: sg-72be370d
     stage: local
     stream: arn:aws:kinesis:us-east-1:185354281374:stream/demo-test
+    streamName: demo-local
     subnet: subnet-c79d94ea
   test:
     accountId: 185354281374
@@ -31,6 +32,7 @@ custom:
     securityGroupRedis: sg-72be370d
     stage: test
     stream: arn:aws:kinesis:us-east-1:185354281374:stream/demo-test
+    streamName: demo-test
     subnet: subnet-c79d94ea
 
 provider:
@@ -45,6 +47,7 @@ provider:
     REDIS_PORT: ${self:custom.${opt:stage}.redisPort}
     REGION: ${self:custom.${opt:stage}.region}
     STAGE: ${opt:stage}
+    STREAM: ${self:custom.${opt:stage}.streamName}
   iamRoleStatements:
     - Effect: Allow
       Action:
