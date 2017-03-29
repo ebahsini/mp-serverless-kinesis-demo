@@ -89,7 +89,7 @@ function parseStream(records, ledger) {
       event.url = items[1];
       event.action = items[2];
       // update collection
-      console.log(event);
+      //console.log(event);
       events.push(event);
     });
   });
