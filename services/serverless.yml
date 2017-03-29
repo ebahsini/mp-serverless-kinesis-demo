@@ -1,4 +1,4 @@
-service: demo-consumer
+service: demo
 
 # many configuration values are not required for testing
 # but these are preserved to facilitate creating a new
@@ -8,30 +8,30 @@ service: demo-consumer
 custom:
   local:
     accountId: 185354281374
-    cacheNodeType: cache.t2.micro
     emailAlert: mpalerts.test@mobileposse.com
     emailSource: mpalerts.test@mobileposse.com
+    logGroup: arn:aws:logs:us-east-1:local:log-group:/aws/lambda/*:*:*
     redisHost: localhost
     redisPort: 6379
     region: us-east-2
     runtime: nodejs4.3
-    securityGroupRedis: sg-8a67b4f6
+    securityGroupRedis: sg-72be370d
     stage: local
-    stream: arn:aws:kinesis:us-east-1:185354281374:stream/epx-kinesis-cache-stream-local
-    subnet: subnet-79460c0f
+    stream: arn:aws:kinesis:us-east-1:185354281374:stream/demo-test
+    subnet: subnet-c79d94ea
   test:
     accountId: 185354281374
-    cacheNodeType: cache.t2.micro
     emailAlert: mpalerts.test@mobileposse.com
     emailSource: mpalerts.test@mobileposse.com
-    redisHost: demo-consumer-test.z6hach.0001.use1.cache.amazonaws.com
+    logGroup: arn:aws:logs:us-east-1:test:log-group:/aws/lambda/*:*:*
+    redisHost: demo-test.z6hach.0001.use1.cache.amazonaws.com
     redisPort: 6379
     region: us-east-1
     runtime: nodejs4.3
-    securityGroupRedis: sg-8a67b4f6
+    securityGroupRedis: sg-72be370d
     stage: test
-    stream: arn:aws:kinesis:us-east-1:185354281374:stream/epx-kinesis-cache-stream-test
-    subnet: subnet-79460c0f
+    stream: arn:aws:kinesis:us-east-1:185354281374:stream/demo-test
+    subnet: subnet-c79d94ea
 
 provider:
   name: aws
@@ -44,14 +44,14 @@ provider:
     REDIS_HOST: ${self:custom.${opt:stage}.redisHost}
     REDIS_PORT: ${self:custom.${opt:stage}.redisPort}
     REGION: ${self:custom.${opt:stage}.region}
-    STAGE: ${self:custom.${opt:stage}.stage}
+    STAGE: ${opt:stage}
   iamRoleStatements:
     - Effect: Allow
       Action:
         - logs:CreateLogGroup
         - logs:CreateLogStream
         - logs:PutLogEvents
-      Resource: "*"
+      Resource: ${self:custom.${opt:stage}.logGroup}
     - Effect: "Allow"
       Action:
         - ec2:CreateNetworkInterface
@@ -67,20 +67,24 @@ provider:
       Action:
         - kinesis:*
       Resource: ${self:custom.${opt:stage}.stream}
+    - Effect: Allow
+      Action:
+        - ses:SendEmail
+      Resource: "*"
 
 # items under stream must be indented four spaces
 # or "EventSourceMapping" will not be created (as
 # arn is a property of stream, not a peer)
 functions:
   publish:
-    name: ${self:service}-${self:provider.stage}
+    name: demo-publish-${opt:stage}
     handler: publish.publishStream
     description: ${self:service} - publish device stream
     events:
       - schedule: rate(1 minute)
   consume:
     handler: consume.consumeStream
-    name: ${self:service}-${self:provider.stage}
+    name: demo-consume-${opt:stage}
     description: ${self:service} - consume device stream
     memorySize: 1024
     timeout: 300
@@ -96,7 +100,7 @@ functions:
           startingPosition: TRIM_HORIZON
   configure:
     handler: configure.configureKeywords
-    name: ${self:service}-${self:provider.stage}
+    name: demo-config-${opt:stage}
     description: ${self:service} - configure keywords
     vpc:
       securityGroupIds:
