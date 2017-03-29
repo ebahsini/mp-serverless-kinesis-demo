@@ -34,7 +34,7 @@ var redis = null;
 const coldKeywords = ["doge-memes", "mild-stuffs", "robot-matchmaking"];
 const hotKeywords = ["horrible-materials", "bad-stuffs", "4chan", "4chan.com"];
 const configKey = "demo-keywords";
-var configHot = false;
+const configHot = false;
 
 // main event handler
 module.exports.configureKeywords = (event, context, callback) => {
