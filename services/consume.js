@@ -1,15 +1,5 @@
 "use strict";
 
-
-
-// ADD YOUR ERROR HANDLING NOTES!!!
-// serverless invoke local --function consumeKinesis --stage local
-
-
-
-
-
-
 // handler configuration
 const config = {};
 config.EMAIL_ALERT = process.env.EMAIL_ALERT;
@@ -47,10 +37,10 @@ const statsKeyTotal = "total_count";
 const statsKeyMatch = "match_count";
 
 // redis caveats
-// 1] keep key names short (when many keys with pattern) to avoid wasting
-// memory (e.g. device based key suffixing)
-// 2] consider two week window for general keys - in general, avoid storing
-// keys without expiration (keywords config would be an exception)
+// 1] keep key names short (when many keys will exist with pattern) to
+// avoid wasting memory (e.g. device based key suffixing)
+// 2] consider two week window for keys - in general, avoid storing keys
+// without expiration (keywords config would be an exception)
 
 
 // main event handler
@@ -59,8 +49,8 @@ module.exports.consumeStream = (event, context, callback) => {
   // serverless invoke local --function consume --path data/event-with-bender.json --stage local
   // copy data from cloudwatch, and store in "data/event-with-bender.json" or
   // similar file, then the development-testing cycle will be much faster than
-  // deploying minor changes (of course, check updates in test before doing
-  // production deployment)
+  // deploying minor changes (of course, check code in realistic test
+  // environment before doing production deployment)
   //console.log(JSON.stringify(event, null, 2));
 
   // date processing - use UTC for simplicity
@@ -73,8 +63,8 @@ module.exports.consumeStream = (event, context, callback) => {
   setup.statsReportKey = isoDateUTC + statsKeySuffix;
 
   // cache will include daily stats and keywords-report data
-  // in different keys -- this could be more flexible, but they
-  // could also be combined
+  // in different keys -- this may be more flexible, but the
+  // data could be combined in a single key
 
   // demo state - pass via parameter, not actual global
   var DS = {};
@@ -125,12 +115,7 @@ function parseStream(records, ledger) {
   //console.log("parseStream");
   ledger.stats["parseStream"] = {};
   ledger.stats["parseStream"].duration = new Date();
-
-//stuff goes here
-
-
-
-  // assemble data from records
+  // assemble device-url "events" from records
   var event;
   var events = [];
   records.map((record) => {
@@ -142,27 +127,24 @@ function parseStream(records, ledger) {
       event = {};
       // denormalize payload data
       event.status = defaultState;
+      event.matches = [];
       event.device = payload.device_id;
       event.time_publish = payload.time;
       event.metadata = payload.meta_data;
       // create event for each log action
       var items = log.split("|");
+      // if your lips are not quivering at the lack of error
+      // checking here, you have not been doing this
+      // long enough... check for malformed data,
+      // find it before it finds you
       event.time = items[0];
       event.url = items[1];
       event.action = items[2];
       //console.log(event);
-      event.matches = [];
-      // update collection
       events.push(event);
     });
   });
   ledger.events = events;
-  // update daily stats
-
-
-
-
-
   // update handler stats
   ledger.stats["parseStream"].event_count = events.length;
   var duration = new Date() - ledger.stats["parseStream"].duration;

@@ -1,10 +1,5 @@
 service: demo
 
-# many configuration values are not required for testing
-# but these are preserved to facilitate creating a new
-# consumer service (with useful configs) -- check
-# values against relevant deployed services
-
 custom:
   local:
     accountId: 185354281374

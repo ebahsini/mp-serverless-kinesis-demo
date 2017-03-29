@@ -13,7 +13,7 @@ IP_ADDRESS = {
 
 BOX_SOURCE = 'http://cloud-images.ubuntu.com/'
 BOX_TYPE = 'vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box'
-ANSIBLE_PLAYBOOK = '../../ansible/playbooks/dev_aws_fullstack.yml'
+ANSIBLE_PLAYBOOK = '../../ansible/playbooks/dev_epx_fullstack.yml'
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.define :epx_dev do |epx|

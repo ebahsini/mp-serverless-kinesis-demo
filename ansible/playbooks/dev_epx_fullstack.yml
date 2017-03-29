@@ -1,5 +1,5 @@
 ---
-# provision aws_dev server from ubuntu box
+# provision epx_dev server from ubuntu box
 #
 # what is this "fullstack" nonsense? when using images, it often makes
 # sense to provision a base box with dependencies that rarely change

@@ -1,5 +1,20 @@
 "use strict";
 
+// WHAT ARE WE DOING HERE?
+// normally, configuration-in-cache would be set via
+// web interface or command like (e.g. redis-cli), but
+// for simplicity, we use a service, but this is all about
+// learning to love functions-as-a-service, so when you
+// have a problem, please consider creating a fuction
+//
+// when testing, set config using aws console via "test"
+// to see changes in config leads to matches, update
+// configHot to *true*, deploy and reset config
+//
+// coldKeywords will match "bender" data (when produce
+// is in test mode), whereas hotKeywords will match the
+// other devices
+
 // handler configuration
 const config = {};
 config.REDIS_HOST = process.env.REDIS_HOST;

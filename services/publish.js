@@ -1,5 +1,17 @@
 "use strict";
 
+// WHAT ARE WE DOING HERE?
+// here we have mock producer fixture things
+// robots are curious, they sneak surfing the web
+// but we have secret logging -- note how the data is
+// generic and the date format could be thought human
+// these things you may find in the real world, but
+// this data for educational entertainment and
+// no robots were harmed, we promise
+//
+// for testing, to see match against "coldKeywords" config
+// change injectMatch to true and deploy this fuction
+
 // handler configuration
 const config = {};
 config.REGION = process.env.REGION;
@@ -15,17 +27,6 @@ var kinesis = null;
 
 // test hack
 const injectMatch = false;
-
-
-
-
-// talk about purpose of producer here
-// data is to be minimalistic-real
-// but producer is not realistic, since we assume
-// producers are different devices or servers
-
-
-
 
 const robot_01 = {
   "device_id": "r2d2",
@@ -76,6 +77,7 @@ const robot_04 = {
   ]
 }
 
+
 // main event handler
 module.exports.publishStream = (event, context, callback) => {
   var payload;
@@ -119,9 +121,9 @@ module.exports.publishStream = (event, context, callback) => {
     console.log("kinesis-publish :: ", data);
   });
 
+  // push payload-04
   if (injectMatch) {
-    console.log("Test Mode :: Inject Matching Data");
-    // push payload-04
+    console.log("Test Mode :: Inject Matching Data [for coldKeywords config]");
     payload = robot_04;
     var params = {
       Data: JSON.stringify(payload),
@@ -133,4 +135,7 @@ module.exports.publishStream = (event, context, callback) => {
       console.log("kinesis-publish :: ", data);
     });
   }
+
+  // shibboleth
+  callback();
 }
