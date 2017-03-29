@@ -212,7 +212,7 @@ function checkKeywords(ledger, counter) {
     ledger.stats["checkKeywords"].list_matches = 0;
     ledger.stats["checkKeywords"].cache_errors = 0;
   }
-  //console.log("checkKeywords :: " + counter);
+  console.log("checkKeywords :: " + counter);
   // punt when lacking keywords
   if (!ledger.keywords) {
     var duration = new Date() - ledger.stats["checkKeywords"].duration;
@@ -260,6 +260,9 @@ function checkKeywords(ledger, counter) {
     }
     // send alert
     if (event.status == matchState) {
+      // async fun, if you serialize alert, SES timeout
+      // will shut down your pipeline
+      console.log("Suspicious Activity - Sending Alert!");
       sendAlert(event, ledger);
     }
     // check next event
@@ -307,8 +310,11 @@ function sendAlert(event, ledger) {
   //console.log(params);
   //console.log(message);
   ses.sendEmail(params, function(err, data) {
-    if (err) console.log(err, err.stack);
-    console.log("ses.sendEmail ::", data);
+    if (err) {
+      console.log(err, err.stack);
+    } else {
+      console.log("ses.sendEmail ::", data);
+    }
   });
 }
 
