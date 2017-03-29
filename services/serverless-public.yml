@@ -2,33 +2,33 @@ service: demo
 
 custom:
   local:
-    accountId: 185354281374
-    emailAlert: serverlessrobots@gmail.com
-    emailSource: alertsdemo@mobileposse.com
+    accountId: MISSING_ACCOUNT
+    emailAlert: MISSING_SES_VALIDATED_EMAIL
+    emailSource: MISSING_SES_VALIDATED_EMAIL.com
     logGroup: arn:aws:logs:us-east-1:local:log-group:/aws/lambda/*:*:*
     redisHost: localhost
     redisPort: 6379
     region: us-east-1
     runtime: nodejs4.3
-    securityGroupRedis: sg-72be370d
+    securityGroupRedis: MISSING_SECURITY_GROUP
     stage: local
-    stream: arn:aws:kinesis:us-east-1:185354281374:stream/demo-test
+    stream: MISSING_STREAM_ARN
     streamName: demo-local
-    subnet: subnet-c79d94ea
+    subnet: MISSING_PRIVATE_SUBNET
   test:
-    accountId: 185354281374
-    emailAlert: serverlessrobots@gmail.com
-    emailSource: alertsdemo@mobileposse.com
+    accountId: MISSING_ACCOUNT
+    emailAlert: MISSING_SES_VALIDATED_EMAIL
+    emailSource: MISSING_SES_VALIDATED_EMAIL
     logGroup: arn:aws:logs:us-east-1:test:log-group:/aws/lambda/*:*:*
     redisHost: demo-test.z6hach.0001.use1.cache.amazonaws.com
     redisPort: 6379
     region: us-east-1
     runtime: nodejs4.3
-    securityGroupRedis: sg-72be370d
+    securityGroupRedis: MISSING_SECURITY_GROUP
     stage: test
-    stream: arn:aws:kinesis:us-east-1:185354281374:stream/demo-test
+    stream: MISSING_STREAM_ARN
     streamName: demo-test
-    subnet: subnet-c79d94ea
+    subnet: MISSING_PRIVATE_SUBNET
 
 provider:
   name: aws
