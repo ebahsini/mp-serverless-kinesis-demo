@@ -42,21 +42,26 @@ module.exports.consumeStream = (event, context, callback) => {
   redis = new Redis(config.REDIS_PORT, config.REDIS_HOST);
 
   // process stream data
-  parseKinesis(event.Records, DS);
+  parseStream(event.Records, DS);
 
   // testing artifacts
   //console.log(DS.events);
-  //IGS.events = DS.events.slice(0, 1);
+  //DS.events = DS.events.slice(0, 1);
   console.log("event-zero ::", DS.events[0]);
   console.log("event-count ::", DS.events.length);
 
-  // leave happy
-  getOut();
+  // callback flow - async tasks serialized manually
+  // getKeywords
+  // -> checkKeywords
+  // -> updateStats
+  // -> logStats
+  // -> getOut
+  getKeywords(DS);
 };
 
 
 // helpers
-function parseKinesis(records, ledger) {
+function parseStream(records, ledger) {
   // obtain url-events from records
   var event;
   var events = [];
@@ -84,7 +89,21 @@ function parseKinesis(records, ledger) {
   ledger.events = events;
 }
 
-function sendAlertEmail(alert, ledger) {
+function getKeywords(ledger) {
+  console.log("getKeywords");
+
+
+  checkKeywords(ledger);
+}
+
+function checkKeywords(ledger) {
+  console.log("checkKeywords");
+
+  updateStats(ledger)
+}
+
+function sendAlert(alert, ledger) {
+  console.log("sendAlert");
   var message;
   var params;
   message =
@@ -113,6 +132,19 @@ function sendAlertEmail(alert, ledger) {
     if (err) console.log(err, err.stack);
     console.log("ses.sendEmail :: ", data);
   });
+}
+
+function updateStats(ledger) {
+  console.log("updateStats");
+
+  logStats(ledger);
+}
+
+
+function logStats(ledger) {
+  console.log("logStats");
+
+  getOut(ledger);
 }
 
 function getOut(ledger) {
