@@ -2,33 +2,33 @@ service: demo
 
 custom:
   local:
-    accountId: 185354281374
-    emailAlert: serverlessrobots@gmail.com
+    accountId: {this will be yours}
+    emailAlert: {this will be yours}
     emailSource: alertsdemo@mobileposse.com
     logGroup: arn:aws:logs:us-east-1:local:log-group:/aws/lambda/*:*:*
     redisHost: localhost
     redisPort: 6379
     region: us-east-1
     runtime: nodejs4.3
-    securityGroupRedis: sg-72be370d
+    securityGroupRedis: {this will be yours}
     stage: local
-    stream: arn:aws:kinesis:us-east-1:185354281374:stream/demo-test
+    stream: arn:aws:kinesis:us-east-1:{this will be yours}:stream/demo-test
     streamName: demo-local
-    subnet: subnet-c79d94ea
+    subnet: {this will be yours}
   test:
-    accountId: 185354281374
-    emailAlert: serverlessrobots@gmail.com
-    emailSource: alertsdemo@mobileposse.com
+    accountId: {this will be yours}
+    emailAlert: {this will be yours}
+    emailSource: {this will be yours}
     logGroup: arn:aws:logs:us-east-1:test:log-group:/aws/lambda/*:*:*
     redisHost: demo-test.z6hach.0001.use1.cache.amazonaws.com
     redisPort: 6379
     region: us-east-1
     runtime: nodejs4.3
-    securityGroupRedis: sg-72be370d
+    securityGroupRedis: {this will be yours}
     stage: test
-    stream: arn:aws:kinesis:us-east-1:185354281374:stream/demo-test
+    stream: arn:aws:kinesis:us-east-1:{this will be yours}:stream/demo-test
     streamName: demo-test
-    subnet: subnet-c79d94ea
+    subnet: {this will be yours}
 
 provider:
   name: aws
